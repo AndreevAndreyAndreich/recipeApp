@@ -1,0 +1,58 @@
+/* Общие стили для контейнера авторизации */
+.auth-container {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    min-height: 80vh; /* Задает высоту, чтобы форма была в центре экрана */
+    background-color: #f0f2f5; /* Светлый фон для улучшения контраста */
+  }
+  
+  /* Карточка с формой авторизации */
+  .auth-card {
+    background-color: #ffffff;
+    padding: 40px;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    width: 400px;
+    max-width: 90%;
+    text-align: center;
+  }
+  
+  /* Заголовок карточки */
+  .auth-card h2 {
+    margin-bottom: 20px;
+    color: #007bff;
+  }
+  
+  /* Форма */
+  .auth-card form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+  }
+  
+  /* Поля ввода */
+  .auth-card input {
+    padding: 10px;
+    font-size: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+  }
+  
+  /* Кнопка отправки формы */
+  .auth-card button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+  }
+  
+  .auth-card button:hover {
+    background-color: #0056b3;
+  }
+
+  
