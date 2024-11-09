@@ -13,19 +13,27 @@ export const getRecipes = async () => {
     }
   };
   
-
-export const getUserRecommendations = async (userId) => {
-  return await axios.get(`${API_URL}/users/${userId}/recommendations`);
+// Получение рекомендаций на основе избранных рецептов пользователя
+export const getRecommendationsBasedOnFavorites = async (userId) => {
+  const response = await axios.get(`http://localhost:3000/users/${userId}/recommendations`);
+  return response.data;
 };
 
+// Добавление рецепта в избранное
 export const addRecipeToFavorites = async (userId, recipeId) => {
   try {
-    const response = await axios.post(
-      `http://localhost:3000/users/${userId}/favorites`,
-      { recipeId },
-    );
+    const response = await axios.post(`http://localhost:3000/users/${userId}/favorites`, {
+      recipeId,
+    });
     return response.data;
-  } catch (err) {
-    throw err;
+  } catch (error) {
+    console.error("Ошибка при добавлении в избранное:", error);
+    throw error; // Прокидываем ошибку, чтобы она была обработана в вызывающем коде
   }
+};
+
+
+export const getUserRecommendations = async (userId) => {
+  const response = await axios.get(`http://localhost:3000/users/${userId}/recommendations`);
+  return response.data;
 };

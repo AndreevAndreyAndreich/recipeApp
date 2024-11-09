@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { getRecipes, getUserRecommendations, addRecipeToFavorites } from './api/api';
+import { getRecipes, getRecommendationsBasedOnFavorites, addRecipeToFavorites, getUserRecommendations } from './api/api';
 import Fuse from 'fuse.js';
 import { BrowserRouter as Router, Route, Routes, Link } from 'react-router-dom';
 import SignUp from './components/SignUp';
@@ -32,13 +32,19 @@ function App() {
       .catch((err) => console.error('Ошибка при получении рекомендаций:', err));
   }, [userId]);
 
-  const handleAddToFavorites = (recipeId) => {
-    addRecipeToFavorites(userId, recipeId)
-      .then(() => {
-        alert('Рецепт добавлен в избранное!');
-      })
-      .catch(err => console.error(err));
+  const handleAddToFavorites = async (recipeId) => {
+    try {
+      await addRecipeToFavorites(userId, recipeId);
+      alert('Рецепт добавлен в избранное!');
+      
+      // Обновить рекомендации после добавления в избранное
+      const recommendations = await getRecommendationsBasedOnFavorites(userId);
+      setRecommendations(recommendations);
+    } catch (error) {
+      console.error('Ошибка при добавлении в избранное:', error);
+    }
   };
+  
 
   const handleSearchQueryChange = (e) => {
     setSearchQuery(e.target.value);

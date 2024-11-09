@@ -1,34 +1,12 @@
-// models/User.js
+// models/User.js 
 const mongoose = require('mongoose');
 
 // Создаем схему пользователя
 const UserSchema = new mongoose.Schema({
-  user_id: {
-    type: String,
-    required: true,
-    unique: true,
-  },
-  name: {
-    type: String,
-    required: true,
-  },
-  email: {
-    type: String,
-    required: true,
-    unique: true,
-  },
-  password: {
-    type: String,
-    required: false,
-  },
-  preferences: {
-    type: [String],
-    default: [],
-  },
-  favorites: {
-    type: [String],
-    default: [],
-  },
+    username: { type: String, required: true },
+    email: { type: String, required: true, unique: true },
+    password: { type: String, required: true },
+    favorites: { type: [String], default: [] } // Добавляем поле избранного
 });
 
 const User = mongoose.model('User', UserSchema);

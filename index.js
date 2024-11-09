@@ -15,12 +15,30 @@ app.use(cors());
 // Регистрация пользователя
 app.post('/register', async (req, res) => {
   try {
-    console.log(req.body); // Добавьте для отладки
-    // Здесь должна быть логика регистрации пользователя (например, создание пользователя в базе данных)
-    res.status(201).send({ message: 'Пользователь успешно зарегистрирован' });
+    const { userId, name, email, password } = req.body;
+
+    // Проверьте, все ли обязательные поля пришли
+    if (!userId || !name || !email || !password) {
+      return res.status(400).json({ error: 'Пожалуйста, заполните все обязательные поля.' });
+    }
+
+    // Хэширование пароля
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    // Создание нового пользователя
+    const newUser = new User({
+      user_id: userId,
+      name,
+      email,
+      password: hashedPassword,
+    });
+
+    // Сохранение пользователя в базе данных
+    await newUser.save();
+    res.status(201).json({ message: 'Пользователь успешно зарегистрирован!' });
   } catch (error) {
     console.error('Ошибка при регистрации:', error);
-    res.status(500).send({ error: 'Ошибка на сервере при регистрации' });
+    res.status(500).json({ error: 'Ошибка на сервере при регистрации' });
   }
 });
 
@@ -173,30 +191,38 @@ app.post('/recipes/:id/reviews', async (req, res) => {
 });
   
 app.get('/users/:userId/recommendations', async (req, res) => {
-    try {
-      // Найти пользователя по ID
-      const user = await User.findOne({ user_id: req.params.userId });
-      if (!user) {
-        return res.status(404).send({ message: 'Пользователь не найден' });
-      }
-  
-      // Определить предпочтения пользователя (категории и ингредиенты)
-      const userPreferences = user.preferences;
-  
-      // Найти рецепты, которые соответствуют предпочтениям пользователя
-      const recommendedRecipes = await Recipe.find({
-        $or: [
-          { category: { $in: userPreferences } },
-          { "ingredients.name": { $in: userPreferences } }
-        ]
-      });
-  
-      // Убрать рецепты, которые пользователь уже добавил в избранное
-      const filteredRecipes = recommendedRecipes.filter(recipe => !user.favorites.includes(recipe.recipe_id));
-  
-      res.send(filteredRecipes);
-    } catch (err) {
-      res.status(500).send(err);
+  try {
+    const userId = req.params.userId;
+    const user = await User.findOne({ user_id: userId });
+
+    if (!user) {
+      return res.status(404).json({ error: 'Пользователь не найден' });
     }
-  });
-  
+
+    // Найти рецепты, которые похожи на те, что в избранном
+    const favoriteRecipes = await Recipe.find({ _id: { $in: user.favorites } });
+
+    // Собираем категории и ингредиенты, чтобы найти похожие рецепты
+    let categories = new Set();
+    let ingredients = new Set();
+
+    favoriteRecipes.forEach(recipe => {
+      categories.add(recipe.category);
+      recipe.ingredients.forEach(ingredient => ingredients.add(ingredient.name));
+    });
+
+    // Найти похожие рецепты по категориям или ингредиентам
+    const recommendations = await Recipe.find({
+      $or: [
+        { category: { $in: Array.from(categories) } },
+        { 'ingredients.name': { $in: Array.from(ingredients) } }
+      ],
+      _id: { $nin: user.favorites } // Исключаем уже добавленные в избранное
+    });
+
+    res.json(recommendations);
+  } catch (error) {
+    console.error('Ошибка при получении рекомендаций:', error);
+    res.status(500).json({ error: 'Ошибка на сервере при получении рекомендаций' });
+  }
+});
